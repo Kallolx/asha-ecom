@@ -20,18 +20,15 @@ service cloud.firestore {
     
     // Orders collection
     match /orders/{orderId} {
-      allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId || 
-        isAdmin() || 
-        isRider()
-      );
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (
         isAdmin() || 
-        (isRider() && request.resource.data.status == 'delivered' && resource.data.status == 'processing')
+        (isRider() && request.resource.data.status == 'delivered' && resource.data.status == 'processing') ||
+        request.auth.uid == resource.data.userId
       );
       // Allow querying orders
-      allow list: if isAuthenticated() && (isAdmin() || isRider());
+      allow list: if isAuthenticated();
     }
     
     // Users collection
@@ -57,7 +54,7 @@ service cloud.firestore {
     // User Orders subcollection
     match /users/{userId}/orders/{orderId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
     }
 
     // Cart collection
