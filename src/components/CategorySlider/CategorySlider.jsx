@@ -1,47 +1,46 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { FaCarrot, FaBreadSlice, FaGift } from 'react-icons/fa';
-import { GiHoneypot } from 'react-icons/gi';
-import { MdOutlineWbSunny } from 'react-icons/md';
 import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/pagination';
 import { FreeMode, Pagination, Autoplay } from 'swiper/modules';
 
-const categories = [
-  {
+const categoryMappings = {
+  'fresh-farm': {
     name: 'Fresh Farm',
-    icon: <FaCarrot />,
-    textColor: 'text-[#2B7A0B]',
-    count: '150+ Items'
+    icon: '/icons/fresh.png',
   },
-  {
+  'bakery': {
     name: 'Bakery',
-    icon: <FaBreadSlice />,
-    textColor: 'text-[#2B7A0B]',
-    count: '80+ Items'
+    icon: '/icons/bakery.png',
   },
-  {
-    name: 'Other Products',
-    icon: <GiHoneypot />,
-    textColor: 'text-[#2B7A0B]',
-    count: '25+ Items'
+  'other-products': {
+    name: 'Others',
+    icon: '/icons/other.png',
   },
-  {
-    name: 'Seasonal Products',
-    icon: <MdOutlineWbSunny />,
-    textColor: 'text-[#2B7A0B]',
-    count: '45+ Items'
+  'seasonal-products': {
+    name: 'Seasonal',
+    icon: '/icons/seasonal.png',
   },
-  {
-    name: 'Special Products',
-    icon: <FaGift />,
-    textColor: 'text-[#2B7A0B]',
-    count: '30+ Items'
+  'special-products': {
+    name: 'Special',
+    icon: '/icons/special.png',
   }
-];
+};
+
+const categories = Object.entries(categoryMappings).map(([id, data]) => ({
+  id,
+  ...data
+}));
 
 const CategorySlider = () => {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (categoryId) => {
+    navigate(`/category/${categoryId}`);
+  };
+
   return (
     <div className="py-8 md:py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
@@ -80,22 +79,26 @@ const CategorySlider = () => {
           modules={[FreeMode, Pagination, Autoplay]}
           className="w-full pb-12"
         >
-          {categories.map((category, index) => (
-            <SwiperSlide key={index} className="!w-[160px] md:!w-auto">
-              <div className="bg-[#F3F9F1] rounded-xl p-6 md:p-8 h-[180px] md:h-[220px] flex flex-col items-center justify-center group cursor-pointer hover:bg-[#E7F3E5] transition-colors duration-300">
+          {categories.map((category) => (
+            <SwiperSlide key={category.id} className="!w-[160px] md:!w-auto">
+              <div 
+                onClick={() => handleCategoryClick(category.id)}
+                className="bg-[#F3F9F1] rounded-xl p-6 md:p-8 h-[180px] md:h-[220px] flex flex-col items-center justify-center group cursor-pointer hover:bg-[#E7F3E5] transition-colors duration-300"
+              >
                 {/* Icon Container */}
-                <div className={`${category.textColor} text-4xl md:text-5xl mb-6 transform transition-transform duration-300 group-hover:scale-110`}>
-                  {category.icon}
+                <div className="w-16 h-16 md:w-24 md:h-24 mb-6 transform transition-transform duration-300 group-hover:scale-110">
+                  <img 
+                    src={category.icon} 
+                    alt={category.name}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
 
                 {/* Text Content */}
                 <div className="text-center">
-                  <h3 className={`${category.textColor} font-bold text-base md:text-xl mb-2`}>
+                  <h3 className="text-[#2B7A0B] font-bold text-base md:text-xl">
                     {category.name}
                   </h3>
-                  <span className="text-[#2B7A0B]/70 text-xs md:text-sm">
-                    {category.count}
-                  </span>
                 </div>
               </div>
             </SwiperSlide>
