@@ -23,6 +23,8 @@ import { FiPackage, FiClock, FiCheck, FiX, FiTruck } from 'react-icons/fi';
 import RiderGuard from './components/Rider/RiderGuard';
 import RiderLayout from './components/Rider/RiderLayout';
 import RiderOrders from './components/Rider/RiderOrders';
+import ProductDetail from './pages/ProductDetail';
+import ScrollToTop from './components/ScrollToTop';
 
 // Home page component
 const Home = () => (
@@ -307,11 +309,13 @@ const App = () => {
     <AuthProvider>
       <CartProvider>
         <Router>
+          <ScrollToTop />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<MainLayout><Home /></MainLayout>} />
             <Route path="/products" element={<MainLayout><Products /></MainLayout>} />
             <Route path="/category/:id" element={<MainLayout><CategoryProducts /></MainLayout>} />
+            <Route path="/product/:productId" element={<MainLayout><ProductDetail /></MainLayout>} />
             
             {/* Protected Admin Routes */}
             <Route
