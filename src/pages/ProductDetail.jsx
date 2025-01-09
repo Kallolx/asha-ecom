@@ -75,6 +75,16 @@ const ProductDetail = () => {
     }, 500);
   };
 
+  const handleBuyNow = () => {
+    // First add to cart
+    addToCart(product, selectedPackage, quantity);
+    // Find and click the checkout trigger directly
+    const checkoutButton = document.querySelector('[data-checkout-trigger]');
+    if (checkoutButton) {
+      checkoutButton.click();
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -199,19 +209,30 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
-              <button 
-                onClick={handleAddToCart}
-                disabled={isAdding}
-                className={`w-full bg-[#2B7A0B] hover:bg-[#236209] text-white py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 ${
-                  isAdding ? 'scale-95 opacity-75' : ''
-                }`}
-              >
-                <FaShoppingCart className={`w-5 h-5 transform transition-transform duration-500 ${
-                  isAdding ? 'rotate-[360deg] scale-110' : ''
-                }`} />
-                <span className="text-lg">{isAdding ? 'Added!' : 'Add to Cart'}</span>
-              </button>
+              {/* Action Buttons */}
+              <div className="flex gap-3 w-full">
+                {/* Buy Now Button */}
+                <button 
+                  onClick={handleBuyNow}
+                  className="flex-1 bg-[#FF8A00] hover:bg-[#E67A00] text-white py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300"
+                >
+                  <span className="text-lg">Buy Now</span>
+                </button>
+
+                {/* Add to Cart Button */}
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={isAdding}
+                  className={`w-14 sm:flex-1 bg-[#2B7A0B] hover:bg-[#236209] text-white py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 ${
+                    isAdding ? 'scale-95 opacity-75' : ''
+                  }`}
+                >
+                  <FaShoppingCart className={`w-5 h-5 transform transition-transform duration-500 ${
+                    isAdding ? 'rotate-[360deg] scale-110' : ''
+                  }`} />
+                  <span className="hidden sm:inline text-lg">{isAdding ? 'Added!' : 'Add to Cart'}</span>
+                </button>
+              </div>
 
               {/* Product Features */}
               <div className="mt-6 flex flex-col gap-3">

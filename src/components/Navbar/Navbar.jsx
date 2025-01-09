@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiShoppingCart, FiPhone, FiMenu, FiUser, FiLogOut, FiPackage, FiSettings, FiHeart } from 'react-icons/fi';
+import { FiShoppingCart, FiPhone, FiMenu, FiUser, FiLogOut, FiPackage, FiSettings, FiMessageCircle } from 'react-icons/fi';
 import { BiSearch } from 'react-icons/bi';
-import { AiOutlineHeart } from 'react-icons/ai';
 import { MdOutlineLocalShipping } from 'react-icons/md';
 import MobileSidebar from '../MobileSidebar/MobileSidebar';
 import { useCart } from '../../context/CartContext';
@@ -17,15 +16,20 @@ const Navbar = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
+  const [isQuickContactOpen, setIsQuickContactOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const quickContactRef = useRef(null);
   const { getCartCount } = useCart();
   const { user, logOut } = useAuth();
 
-  // Close user menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
+      }
+      if (quickContactRef.current && !quickContactRef.current.contains(event.target)) {
+        setIsQuickContactOpen(false);
       }
     };
 
@@ -108,25 +112,86 @@ const Navbar = () => {
 
               {/* Icons */}
               <div className="flex items-center gap-3 md:gap-6">
-                <div className="flex flex-col items-center cursor-pointer group">
-                  <div className="relative">
-                    <AiOutlineHeart className="text-xl md:text-2xl text-neutral group-hover:text-primary transition-colors" />
-                    <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
-                  </div>
-                  <span className="text-[10px] md:text-xs mt-1">Wishlist</span>
+                {/* Quick Chat/Contact Button */}
+                <div className="relative" ref={quickContactRef}>
+                  <button
+                    onClick={() => setIsQuickContactOpen(!isQuickContactOpen)}
+                    className="relative p-2 hover:bg-neutral-lightest rounded-full transition-colors flex flex-col items-center"
+                  >
+                    <FiMessageCircle size={24} className="text-neutral group-hover:text-primary transition-colors" />
+                    <span className="text-[10px] absolute -bottom-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">Contact</span>
+                  </button>
+
+                  {/* Quick Contact Dropdown */}
+                  {isQuickContactOpen && (
+                    <div className="absolute top-[calc(100%+1rem)] right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 py-3 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">Quick Contact</p>
+                        <p className="text-xs text-gray-500">We're here to help!</p>
+                      </div>
+                      
+                      <div className="py-2">
+                        <a 
+                          href="tel:01831-624571" 
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <FiPhone className="text-[#2B7A0B]" />
+                          <div>
+                            <p className="font-medium">Call Us</p>
+                            <p className="text-xs text-gray-500">01831-624571</p>
+                          </div>
+                        </a>
+                        
+                        <a 
+                          href="https://wa.me/+8801831624571" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.964 9.964 0 001.333 4.993L2 22l5.233-1.237a9.994 9.994 0 004.779 1.217h.004c5.505 0 9.988-4.478 9.988-9.984 0-2.669-1.037-5.176-2.922-7.062A9.935 9.935 0 0012.012 2zm-3.97 14.256l-2.345-.673 2.325-3.81 2.345.673-2.325 3.81zm9.924-4.27c-.215.335-1.33.81-1.874.922-.543.112-1.235.155-1.993-.155-.758-.31-1.484-.758-2.294-1.568s-1.257-1.536-1.567-2.294c-.31-.758-.268-1.45-.156-1.993.112-.543.587-1.659.922-1.874.335-.215.71-.129.963.039.254.168.547.465.797.715.25.25.504.543.672.797.168.254.254.63.039.964-.215.335-.672.923-.672.923s.168.758.923 1.513c.755.755 1.513.923 1.513.923s.587-.458.922-.673c.335-.215.71-.129.964.039.254.168.547.465.797.715.25.25.504.543.672.797.168.254.174.63-.041.964z"/>
+                          </svg>
+                          <div>
+                            <p className="font-medium">WhatsApp</p>
+                            <p className="text-xs text-gray-500">Chat with us</p>
+                          </div>
+                        </a>
+
+                        <a 
+                          href="https://m.me/your.facebook.page" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <svg className="w-4 h-4 text-[#0084FF]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.908 1.438 5.504 3.686 7.205V22l3.371-1.85c.93.258 1.914.397 2.943.397 5.523 0 10-4.145 10-9.243C22 6.145 17.523 2 12 2zm1.09 12.409l-2.52-2.688-4.92 2.688 5.4-5.744 2.58 2.688 4.86-2.688-5.4 5.744z"/>
+                          </svg>
+                          <div>
+                            <p className="font-medium">Messenger</p>
+                            <p className="text-xs text-gray-500">Chat on Facebook</p>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div 
-                  className="flex flex-col items-center cursor-pointer group"
+
+                {/* Cart Button */}
+                <button 
                   onClick={() => setIsCartOpen(true)}
+                  data-cart-trigger
+                  className="relative p-2 hover:bg-neutral-lightest rounded-full transition-colors flex flex-col items-center"
                 >
                   <div className="relative">
-                    <FiShoppingCart className="text-xl md:text-2xl text-neutral group-hover:text-primary transition-colors" />
-                    <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                      {getCartCount()}
-                    </span>
+                    <FiShoppingCart size={24} className="text-neutral group-hover:text-primary transition-colors" />
+                    {getCartCount() > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-[#FF8A00] text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
+                        {getCartCount()}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] md:text-xs mt-1">Cart</span>
-                </div>
+                  <span className="text-[10px] absolute -bottom-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">Cart</span>
+                </button>
 
                 {/* Account Section */}
                 {user ? (
