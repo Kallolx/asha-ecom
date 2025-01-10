@@ -290,27 +290,29 @@ const Checkout = ({ isOpen, onClose }) => {
 
               {/* Coupon Section */}
               <div className="mt-6 pt-4 border-t">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     name="coupon"
                     value={formData.coupon}
                     onChange={handleChange}
-                    className="flex-1 py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent transition-all text-sm"
+                    className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent transition-all text-base"
                     placeholder="Enter coupon code"
                   />
                   <button
                     type="button"
                     onClick={validateAndApplyCoupon}
-                    className="px-6 py-3 bg-[#2B7A0B] text-white rounded-xl hover:bg-[#236209] transition-colors text-sm font-medium"
+                    className="w-full sm:w-auto px-8 py-3 bg-[#2B7A0B] text-white rounded-xl hover:bg-[#236209] transition-colors text-base font-medium whitespace-nowrap"
                   >
-                    Apply
+                    {appliedCoupon ? 'Applied!' : 'Apply Coupon'}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                  <FiTag className="text-[#2B7A0B]" />
-                  Use code ASHA50 to get 10% discount on orders above ৳299
-                </p>
+                <div className="mt-3 flex items-start gap-2">
+                  <FiTag className="text-[#2B7A0B] mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-gray-600">
+                    Use code <span className="font-medium text-[#2B7A0B]">ASHA50</span> to get 10% discount on orders above ৳299
+                  </p>
+                </div>
               </div>
 
               {/* Price Breakdown */}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiShoppingCart, FiPhone, FiMenu, FiUser, FiLogOut, FiPackage, FiSettings, FiMessageCircle } from 'react-icons/fi';
+import { FiShoppingCart, FiPhone, FiMenu, FiUser, FiLogOut, FiPackage, FiSettings, FiMessageCircle, FiSearch, FiX, FiChevronDown, FiHeart } from 'react-icons/fi';
 import { BiSearch } from 'react-icons/bi';
 import { MdOutlineLocalShipping } from 'react-icons/md';
 import MobileSidebar from '../MobileSidebar/MobileSidebar';
