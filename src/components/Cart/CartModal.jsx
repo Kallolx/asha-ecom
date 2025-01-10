@@ -135,16 +135,39 @@ const CartModal = ({ isOpen, onClose }) => {
             {cartItems.length > 0 && (
               <div className="sticky bottom-0 bg-white border-t p-3 sm:p-4">
                 <div className="flex justify-between items-center mb-3 sm:mb-4">
-                  <span className="text-sm sm:text-base text-gray-600">Total Amount:</span>
-                  <span className="text-lg sm:text-xl font-bold text-[#2B7A0B]">৳{getCartTotal().toFixed(2)}</span>
+                  <span className="text-base sm:text-lg text-gray-600">Total Amount:</span>
+                  <span className="text-xl sm:text-2xl font-bold text-[#2B7A0B]">৳{getCartTotal().toFixed(2)}</span>
                 </div>
-                <button
-                  onClick={handleProceedToCheckout}
-                  data-checkout-trigger
-                  className="w-full bg-[#2B7A0B] text-white py-2.5 sm:py-3 rounded-full font-medium hover:bg-[#236209] transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
-                >
-                  Proceed to Checkout
-                </button>
+                {!user ? (
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleProceedToCheckout}
+                      className="w-full bg-[#2B7A0B] text-white py-3 sm:py-4 rounded-full font-medium hover:bg-[#236209] transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                    >
+                      Sign In & Checkout
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Skip sign in and go directly to checkout
+                        setIsCheckoutOpen(true);
+                      }}
+                      className="w-full bg-[#FF8A00] text-white py-3 sm:py-4 rounded-full font-medium hover:bg-[#E67A00] transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                    >
+                      Continue as Guest
+                    </button>
+                    <p className="text-center text-sm text-gray-500 mt-2">
+                      Sign in for a faster checkout and to save your order history
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleProceedToCheckout}
+                    data-checkout-trigger
+                    className="w-full bg-[#2B7A0B] text-white py-3 sm:py-4 rounded-full font-medium hover:bg-[#236209] transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                  >
+                    Proceed to Checkout
+                  </button>
+                )}
               </div>
             )}
           </div>

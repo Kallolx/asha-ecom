@@ -116,10 +116,10 @@ const Navbar = () => {
                 <div className="relative" ref={quickContactRef}>
                   <button
                     onClick={() => setIsQuickContactOpen(!isQuickContactOpen)}
-                    className="relative p-2 hover:bg-neutral-lightest rounded-full transition-colors flex flex-col items-center"
+                    className="w-12 flex flex-col items-center"
                   >
-                    <FiMessageCircle size={24} className="text-neutral group-hover:text-primary transition-colors" />
-                    <span className="text-[10px] absolute -bottom-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">Contact</span>
+                    <FiMessageCircle size={24} className="text-neutral group-hover:text-primary transition-colors mb-1" />
+                    <span className="text-[10px]">Contact</span>
                   </button>
 
                   {/* Quick Contact Dropdown */}
@@ -180,9 +180,9 @@ const Navbar = () => {
                 <button 
                   onClick={() => setIsCartOpen(true)}
                   data-cart-trigger
-                  className="relative p-2 hover:bg-neutral-lightest rounded-full transition-colors flex flex-col items-center"
+                  className="w-12 flex flex-col items-center"
                 >
-                  <div className="relative">
+                  <div className="relative mb-1">
                     <FiShoppingCart size={24} className="text-neutral group-hover:text-primary transition-colors" />
                     {getCartCount() > 0 && (
                       <span className="absolute -top-1 -right-1 bg-[#FF8A00] text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
@@ -190,25 +190,26 @@ const Navbar = () => {
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] absolute -bottom-4 left-1/2 transform -translate-x-1/2 whitespace-nowrap">Cart</span>
+                  <span className="text-[10px]">Cart</span>
                 </button>
 
                 {/* Account Section */}
                 {user ? (
-                  <div className="hidden md:flex flex-col items-center cursor-pointer group relative" ref={userMenuRef}>
+                  <div className="hidden md:block relative w-12" ref={userMenuRef}>
                     <button 
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center gap-2"
+                      className="w-full flex flex-col items-center"
                     >
-                      <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center mb-1">
                         {user.photoURL ? (
                           <img src={user.photoURL} alt={user.displayName} className="w-full h-full rounded-full object-cover" />
                         ) : (
-                          <span className="text-sm font-medium">
+                          <span className="text-xs font-medium">
                             {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
                           </span>
                         )}
                       </div>
+                      <span className="text-[10px]">Account</span>
                     </button>
                     
                     {/* User Dropdown Menu */}
@@ -251,13 +252,13 @@ const Navbar = () => {
                     )}
                   </div>
                 ) : (
-                  <div 
-                    className="hidden md:flex flex-col items-center cursor-pointer group"
+                  <button 
                     onClick={() => setIsAuthOpen(true)}
+                    className="hidden md:flex w-12 flex-col items-center"
                   >
-                    <FiUser className="text-xl md:text-2xl text-neutral group-hover:text-primary transition-colors" />
-                    <span className="text-[10px] md:text-xs mt-1">Account</span>
-                  </div>
+                    <FiUser size={24} className="text-neutral group-hover:text-primary transition-colors mb-1" />
+                    <span className="text-[10px]">Account</span>
+                  </button>
                 )}
               </div>
             </div>

@@ -4,156 +4,77 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendPasswordResetEmail,
-  updateProfile,
-  PhoneAuthProvider,
-  signInWithPhoneNumber
+  GoogleAuthProvider,
+  signInWithPopup,
+  updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { auth } from '../config/firebase';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
+export const useAuth = () => useContext(AuthContext);
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Email Sign Up
+  // Sign up with email and password
   const signUp = async (email, password, name) => {
     try {
-      // Create auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // Update profile with name
-      await updateProfile(userCredential.user, {
-        displayName: name
-      });
-
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        uid: userCredential.user.uid,
-        email,
-        name,
-        createdAt: new Date().toISOString(),
-        role: 'customer',
-        orders: []
-      });
-
+      await updateProfile(userCredential.user, { displayName: name });
       toast.success('Account created successfully!');
       return userCredential;
     } catch (error) {
-      let errorMessage = 'Failed to create account.';
-      
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = 'Email is already registered.';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Invalid email address.';
-          break;
-        case 'auth/operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled.';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Password should be at least 6 characters.';
-          break;
-        default:
-          errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage);
+      console.error('Sign up error:', error);
+      toast.error(error.message);
       throw error;
     }
   };
 
-  // Email Sign In
+  // Sign in with email and password
   const signIn = async (email, password) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       toast.success('Signed in successfully!');
       return result;
     } catch (error) {
-      let errorMessage = 'Failed to sign in.';
-      
-      switch (error.code) {
-        case 'auth/invalid-credential':
-          errorMessage = 'Invalid email or password.';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'This account has been disabled.';
-          break;
-        case 'auth/user-not-found':
-          errorMessage = 'No account found with this email.';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Incorrect password.';
-          break;
-        default:
-          errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage);
+      console.error('Sign in error:', error);
+      toast.error('Invalid email or password');
       throw error;
     }
   };
 
-  // Phone Sign In
-  const signInWithPhone = async (phoneNumber, appVerifier) => {
+  // Sign in with Google
+  const signInWithGoogle = async () => {
     try {
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-      return confirmationResult;
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      toast.success('Signed in with Google successfully!');
+      return result;
     } catch (error) {
-      toast.error(error.message);
+      console.error('Google sign in error:', error);
+      toast.error('Failed to sign in with Google');
       throw error;
     }
   };
 
-  // Sign Out
+  // Sign out
   const logOut = async () => {
     try {
       await signOut(auth);
-      setUserRole(null);
       toast.success('Signed out successfully!');
     } catch (error) {
-      toast.error('Failed to sign out.');
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
       throw error;
     }
   };
 
-  // Password Reset
-  const resetPassword = async (email) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast.success('Password reset email sent!');
-    } catch (error) {
-      toast.error('Failed to send password reset email.');
-      throw error;
-    }
-  };
-
-  // Fetch user role from Firestore
-  const fetchUserRole = async (uid) => {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (userDoc.exists()) {
-        setUserRole(userDoc.data().role);
-      }
-    } catch (error) {
-      console.error('Error fetching user role:', error);
-    }
-  };
-
-  // Monitor Auth State
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) {
-        await fetchUserRole(currentUser.uid);
-      } else {
-        setUserRole(null);
-      }
       setLoading(false);
     });
 
@@ -162,13 +83,11 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    userRole,
     loading,
     signUp,
     signIn,
-    signInWithPhone,
-    logOut,
-    resetPassword
+    signInWithGoogle,
+    logOut
   };
 
   return (
@@ -176,12 +95,4 @@ export const AuthProvider = ({ children }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }; 

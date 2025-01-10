@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { FiMapPin, FiPhone, FiUser, FiMessageSquare, FiTag, FiArrowLeft } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiUser, FiMessageSquare, FiTag, FiArrowLeft, FiClock, FiCheck, FiTruck, FiPackage } from 'react-icons/fi';
 import OrderSuccess from '../Order/OrderSuccess';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
@@ -14,7 +14,6 @@ const Checkout = ({ isOpen, onClose }) => {
     name: '',
     phone: '',
     address: '',
-    notes: '',
     coupon: ''
   });
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -30,7 +29,6 @@ const Checkout = ({ isOpen, onClose }) => {
       [name]: value
     }));
 
-    // Reset coupon if coupon field is cleared
     if (name === 'coupon' && value === '') {
       setDiscount(0);
       setAppliedCoupon(false);
@@ -48,7 +46,7 @@ const Checkout = ({ isOpen, onClose }) => {
         toast.error('Coupon already applied');
         return;
       }
-      const discountAmount = subtotal * 0.10; // 10% discount
+      const discountAmount = subtotal * 0.10;
       setDiscount(discountAmount);
       setAppliedCoupon(true);
       toast.success('Coupon applied successfully! 10% discount added');
@@ -91,10 +89,7 @@ const Checkout = ({ isOpen, onClose }) => {
         createdAt: serverTimestamp()
       };
 
-      // Save to admin orders collection
       const adminOrderRef = await addDoc(collection(db, 'orders'), order);
-
-      // Save to user orders collection
       await addDoc(collection(db, `users/${user.uid}/orders`), {
         ...order,
         orderId: adminOrderRef.id
@@ -102,7 +97,7 @@ const Checkout = ({ isOpen, onClose }) => {
 
       setOrderDetails({
         ...order,
-        orderDate: new Date().toISOString() // Convert to ISO string for display
+        orderDate: new Date().toISOString()
       });
       setOrderSuccess(true);
       clearCart();
@@ -115,13 +110,8 @@ const Checkout = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleCloseSuccess = () => {
-    setOrderSuccess(false);
-    onClose();
-  };
-
   if (orderSuccess && orderDetails) {
-    return <OrderSuccess order={orderDetails} onClose={handleCloseSuccess} />;
+    return <OrderSuccess order={orderDetails} onClose={onClose} />;
   }
 
   if (cartItems.length === 0) {
@@ -160,230 +150,235 @@ const Checkout = ({ isOpen, onClose }) => {
   }
 
   return (
-    <div className={`fixed inset-0 z-50 bg-white transition-opacity duration-300 overflow-y-auto ${
+    <div className={`fixed inset-0 z-50 bg-[#F9FAFB] transition-opacity duration-300 overflow-y-auto ${
       isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
     }`}>
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <FiArrowLeft className="w-6 h-6" />
-          </button>
-          <h1 className="text-xl font-semibold text-gray-900 ml-2">Checkout</h1>
+      <div className="max-w-4xl mx-auto px-4 py-6 pb-32">
+        {/* Header with Progress */}
+        <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
+          <div className="flex items-center mb-6">
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <FiArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900 ml-2">Secure Checkout</h1>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="flex justify-between relative">
+            {/* Progress Line */}
+            <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200">
+              <div className="h-full bg-[#2B7A0B] w-1/3" />
+            </div>
+
+            {/* Steps */}
+            <div className="relative flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-[#2B7A0B] text-white flex items-center justify-center mb-2">
+                <FiUser className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-medium">Details</span>
+            </div>
+            <div className="relative flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mb-2">
+                <FiTruck className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-medium text-gray-500">Delivery</span>
+            </div>
+            <div className="relative flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mb-2">
+                <FiPackage className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-medium text-gray-500">Complete</span>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Order Summary */}
-          <div className="bg-[#F3F9F1] rounded-lg p-4">
-            <h2 className="font-semibold text-gray-800 mb-3 text-lg">Order Summary</h2>
-            <div className="space-y-3">
-              {cartItems.map((item) => (
-                <div key={`${item.id}-${item.package.id}`} className="flex justify-between text-sm">
-                  <div className="flex gap-3">
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-gray-500">{item.package.name} x {item.quantity}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Left Column - Form */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Contact Information */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#E7F3E5] flex items-center justify-center">
+                    <FiUser className="w-5 h-5 text-[#2B7A0B]" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Contact Information</h2>
+                </div>
+                {user && (
+                  <div className="text-sm text-gray-600">
+                    Signed in as {user.email}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent transition-all"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent transition-all"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Delivery Address */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-[#E7F3E5] flex items-center justify-center">
+                  <FiMapPin className="w-5 h-5 text-[#2B7A0B]" />
+                </div>
+                <h2 className="text-lg font-semibold">Delivery Address</h2>
+              </div>
+              <textarea
+                name="address"
+                required
+                value={formData.address}
+                onChange={handleChange}
+                rows="3"
+                className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent transition-all"
+                placeholder="Enter your full address"
+              />
+            </div>
+          </div>
+
+          {/* Right Column - Order Summary */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Order Summary */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-6">Order Summary</h2>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                {cartItems.map((item) => (
+                  <div key={`${item.id}-${item.package.id}`} className="flex gap-4 py-3 border-b last:border-0">
+                    <div className="relative">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-16 h-16 rounded-xl object-cover"
+                      />
+                      <span className="absolute -top-2 -right-2 w-6 h-6 bg-[#2B7A0B] text-white text-xs rounded-full flex items-center justify-center font-medium">
+                        {item.quantity}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900">{item.name}</h3>
+                      <p className="text-sm text-gray-500">{item.package.name}</p>
+                      <p className="text-[#2B7A0B] font-medium mt-1">৳{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
-                  <p className="font-medium">৳{(item.price * item.quantity).toFixed(2)}</p>
+                ))}
+              </div>
+
+              {/* Coupon Section */}
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    name="coupon"
+                    value={formData.coupon}
+                    onChange={handleChange}
+                    className="flex-1 py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent transition-all text-sm"
+                    placeholder="Enter coupon code"
+                  />
+                  <button
+                    type="button"
+                    onClick={validateAndApplyCoupon}
+                    className="px-6 py-3 bg-[#2B7A0B] text-white rounded-xl hover:bg-[#236209] transition-colors text-sm font-medium"
+                  >
+                    Apply
+                  </button>
                 </div>
-              ))}
-              <div className="border-t border-gray-200 pt-3 mt-3">
+                <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                  <FiTag className="text-[#2B7A0B]" />
+                  Use code ASHA50 to get 10% discount on orders above ৳299
+                </p>
+              </div>
+
+              {/* Price Breakdown */}
+              <div className="mt-6 pt-4 border-t space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span>Subtotal</span>
+                  <span className="text-gray-600">Subtotal</span>
                   <span>৳{getCartTotal().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm mt-2">
-                  <span>Delivery Fee</span>
-                  <span className="text-[#2B7A0B]">Free for first 10 orders!</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Delivery Fee</span>
+                  <span className="text-[#2B7A0B] font-medium">Free</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-sm mt-2 text-[#2B7A0B]">
+                  <div className="flex justify-between text-sm text-[#2B7A0B]">
                     <span>Discount (10%)</span>
                     <span>-৳{discount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between font-semibold mt-3 pt-3 border-t text-base">
-                  <span>Total Amount</span>
+                <div className="flex justify-between font-semibold text-lg pt-3 border-t">
+                  <span>Total</span>
                   <span className="text-[#2B7A0B]">৳{getFinalTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>
+
+            {/* Delivery Info */}
+            <div className="bg-gradient-to-br from-[#FFF9E5] to-[#FFEDD5] rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#FF8A00] bg-opacity-20 flex items-center justify-center">
+                  <FiClock className="w-5 h-5 text-[#FF8A00]" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-[#FF8A00]">Delivery Information</h3>
+                  <p className="text-sm text-gray-600">Estimated delivery time: 2-3 hours</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FiCheck className="text-[#2B7A0B] w-5 h-5" />
+                  <span>First 10 orders: FREE delivery!</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FiCheck className="text-[#2B7A0B] w-5 h-5" />
+                  <span>After 10 orders: ৳10-20 (based on distance)</span>
+                </div>
+              </div>
+            </div>
           </div>
-
-          {/* Delivery Information */}
-          <div className="bg-yellow-50 rounded-lg p-4">
-            <h2 className="font-semibold text-yellow-800 mb-2 text-lg">Delivery Information</h2>
-            <div className="space-y-1 text-sm text-yellow-800">
-              <p>• First 10 orders: FREE delivery!</p>
-              <p>• After 10 orders: ৳10-20 (based on distance)</p>
-              <p>• Estimated delivery time: 2-3 hours</p>
-            </div>
-          </div>
-
-          {/* Delivery Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white rounded-lg">
-              <h2 className="font-semibold text-gray-800 mb-4 text-lg">Delivery Details</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiUser className="text-gray-400 w-5 h-5" />
-                    </div>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="pl-10 w-full py-3 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent text-base"
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiPhone className="text-gray-400 w-5 h-5" />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      required
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="pl-10 w-full py-3 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent text-base"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Delivery Address *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute top-3 left-3 pointer-events-none">
-                      <FiMapPin className="text-gray-400 w-5 h-5" />
-                    </div>
-                    <textarea
-                      name="address"
-                      required
-                      value={formData.address}
-                      onChange={handleChange}
-                      rows="3"
-                      className="pl-10 w-full py-3 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent text-base"
-                      placeholder="Enter your full address"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Have a Coupon?
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FiTag className="text-gray-400 w-5 h-5" />
-                      </div>
-                      <input
-                        type="text"
-                        name="coupon"
-                        value={formData.coupon}
-                        onChange={handleChange}
-                        className="pl-10 w-full py-3 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent text-base"
-                        placeholder="Enter coupon code"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={validateAndApplyCoupon}
-                      className="px-4 py-2 bg-[#2B7A0B] text-white rounded-lg hover:bg-[#236209] transition-colors"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Use code ASHA50 to get 10% discount on orders above ৳299
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Additional Notes
-                  </label>
-                  <div className="relative">
-                    <div className="absolute top-3 left-3 pointer-events-none">
-                      <FiMessageSquare className="text-gray-400 w-5 h-5" />
-                    </div>
-                    <textarea
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleChange}
-                      rows="2"
-                      className="pl-10 w-full py-3 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7A0B] focus:border-transparent text-base"
-                      placeholder="Any special instructions for delivery"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="bg-[#F3F9F1] rounded-lg p-4">
-              <h2 className="font-semibold text-gray-800 mb-3 text-lg">Payment Method</h2>
-              <div className="flex items-center gap-4 bg-white p-4 rounded-lg border-2 border-[#2B7A0B]">
-                <div className="w-12 h-12 flex items-center justify-center bg-[#2B7A0B] text-white rounded-full text-xl">
-                  ৳
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Cash on Delivery</p>
-                  <p className="text-gray-500">Pay when you receive your order</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Place Order Button */}
-            <div className="sticky bottom-0 bg-white py-4 border-t">
-              <div className="max-w-2xl mx-auto px-4">
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#2B7A0B] text-white py-4 rounded-full font-medium hover:bg-[#236209] transition-colors flex items-center justify-center gap-2 text-lg disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Place Order
-                      <span className="font-medium">• ৳{getFinalTotal().toFixed(2)}</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </form>
         </div>
+
+        {/* Keep the existing sticky button */}
+        <button 
+          type="submit"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[500px] bg-[#2B7A0B] text-white py-4 rounded-full font-medium hover:bg-[#236209] transition-colors flex items-center justify-center gap-2 text-lg disabled:opacity-50 shadow-lg z-50"
+        >
+          {isSubmitting ? (
+            <>
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              Place Order • ৳{getFinalTotal().toFixed(2)}
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
